@@ -2,12 +2,8 @@ var webpack = require('webpack'),
   path = require('path');
 
 module.exports = {
-  // https://webpack.github.io/docs/build-performance.html#sourcemaps
-  devtool: 'source-map',
-
   devServer: {
     contentBase: './build/',
-    colors: true,
     noInfo: true, //  --no-info option
     // host: '',
     port: 9001,
@@ -19,35 +15,39 @@ module.exports = {
 
   entry: {
     main: [/*'webpack/hot/dev-server',*/ 'babel-polyfill', './app/main.js'],
-    sub: [/*'webpack/hot/dev-server',*/ 'babel-polyfill', './app/sub.js']
+    sub: [/*'webpack/hot/dev-server',*/ 'babel-polyfill', './app/sub.js'],
   },
 
   output: {
-    path: __dirname + '/build',
-    filename: "[name].js"
+    filename: "[name].js",
+    path: path.resolve(__dirname, 'build')
   },
 
   module: {
-    loaders: [
-      {test: /\.css$/, loader: "style!css"},
-      {test: /\.jsx?$/, loaders: ['babel'], exclude: /(node_modules|bower_components)/}
+    rules: [
+      {
+        test: /\.jsx?$/,
+        exclude: /(node_modules|bower_components)/,
+        loader: 'babel-loader'
+      }
     ]
   },
 
+  // https://webpack.js.org/configuration/devtool/
+  devtool: 'source-map',
+
   plugins: [
-    // new webpack.HotModuleReplacementPlugin(),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
         drop_console: false,
         warnings: false
       },
-      sourceMap: false,
-      mangle: false
-    })
-  ],
+      sourceMap: true
+    }),
 
-  resolve: {
-    // you can now require('file') instead of require('file.coffee')
-    extension: ['', '.js', '.json', '.coffee']
-  }
+    new webpack.BannerPlugin({
+      banner: '',
+      raw: true
+    })
+  ]
 };

@@ -3,16 +3,12 @@
  */
 var pkg = require('./package.json'),
   gulp = require('gulp'),
-  rename = require("gulp-rename"),
   extend = require('extend'),
   jshint = require('gulp-jshint'),
-  concat = require('gulp-concat'),
   header = require('gulp-header'),
   webpack = require('webpack'),
   WebpackDevServer = require('webpack-dev-server'),
-  webpackStream = require('webpack-stream'),
-  runSequence = require('run-sequence');
-
+  webpackStream = require('webpack-stream');
 
 /*
  * functions
@@ -27,41 +23,6 @@ function banner(_net) {
   ].join('\n');
 }
 
-function buildMergeJS(name, options) {
-  var entry = {};
-  entry[name] = ['./app/' + name + '.js'];
-
-  var dist = 'build';
-
-  if (options) {
-    if (options.requireBabelPolyfill === true) entry[name].unshift('babel-polyfill');
-    if (options.distPath) dist = options.distPath;
-  }
-
-  var config = extend({}, require('./webpack.config.js'), {
-    devtool: 'eval-source-map',
-    entry: entry,
-    output: {
-      filename: name + '.merge.js'
-    },
-    plugins: [
-      new webpack.optimize.UglifyJsPlugin({
-        compress: {
-          drop_console: false,
-          warnings: false
-        },
-        sourceMap: true,
-        mangle: false
-      })
-    ]
-  });
-
-  return gulp.src('')
-    .pipe(webpackStream(config))
-    .pipe(header(banner('dev')))
-    .pipe(gulp.dest(dist));
-};
-
 function buildMinJs(name, options) {
   var entry = {};
   entry[name] = ['./app/' + name + '.js'];
@@ -75,35 +36,27 @@ function buildMinJs(name, options) {
 
   var config = extend({}, require('./webpack.config.js'), {
     entry: entry,
-    output: {
-      filename: name + '.min.js'
-    },
+
     plugins: [
       new webpack.optimize.UglifyJsPlugin({
         compress: {
           drop_console: true,
           warnings: false
         },
-        // make external sourcemap file
-        sourceMap: true,
-        mangle: true
+        sourceMap: true
       }),
 
-      // http://webpack.github.io/docs/list-of-plugins.html#sourcemapdevtoolplugin
-      new webpack.SourceMapDevToolPlugin({
-        test: [dist + '/' + name + '.min.js'],
-        filename: '[file].map',
-        append: '#sourceMappingURL'
+      new webpack.BannerPlugin({
+        banner: banner('live'),
+        raw: true
       })
     ]
   });
 
   return gulp.src('')
-    .pipe(webpackStream(config))
-    .pipe(header(banner('live')))
+    .pipe(webpackStream(config, webpack))
     .pipe(gulp.dest(dist));
 };
-
 
 /*
  * gulp tasks
@@ -126,16 +79,10 @@ gulp.task('lint', function () {
 });
 
 // build js
-gulp.task('devMain', () => {
-  buildMergeJS('main', {requireBabelPolyfill: true})
-});
 gulp.task('liveMain', () => {
   buildMinJs('main', {requireBabelPolyfill: true})
 });
 
-gulp.task('devSub', () => {
-  buildMergeJS('sub', {requireBabelPolyfill: true})
-});
 gulp.task('liveSub', () => {
-  buildMinJs('sub', {requireBabelPolyfill: true})
+  buildMinJs('sub', {requireBabelPolyfill: false})
 });
