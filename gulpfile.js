@@ -5,7 +5,6 @@ var pkg = require('./package.json'),
   gulp = require('gulp'),
   extend = require('extend'),
   jshint = require('gulp-jshint'),
-  header = require('gulp-header'),
   webpack = require('webpack'),
   WebpackDevServer = require('webpack-dev-server'),
   webpackStream = require('webpack-stream');
