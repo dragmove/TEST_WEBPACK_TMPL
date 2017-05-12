@@ -22,19 +22,35 @@ function banner(_net) {
   ].join('\n');
 }
 
+function isDefined(obj) {
+  var flag = true;
+  if (obj === null || typeof obj === 'undefined') return false;
+  return flag;
+}
+
+function isBoolean(obj) {
+  if (!isDefined(obj)) return false;
+  return (obj.constructor === Boolean);
+}
+
 function buildMinJs(name, options) {
   var entry = {};
   entry[name] = ['./app/' + name + '.js'];
 
-  var dist = 'build';
+  var isRequireSourceMap = true,
+    dist = 'build';
 
   if (options) {
     if (options.requireBabelPolyfill === true) entry[name].unshift('babel-polyfill');
+    if (isBoolean(options.requireSourceMap)) isRequireSourceMap = options.requireSourceMap;
     if (options.distPath) dist = options.distPath;
   }
 
   var config = extend({}, require('./webpack.config.js'), {
     entry: entry,
+
+    // https://webpack.js.org/configuration/devtool/
+    devtool: (isRequireSourceMap === true) ? 'source-map' : false,
 
     plugins: [
       new webpack.optimize.UglifyJsPlugin({

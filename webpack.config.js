@@ -41,8 +41,8 @@ module.exports = {
       compress: {
         drop_console: false,
         warnings: false
-      },
-      sourceMap: true
+      }
+      // sourceMap: true
     }),
 
     new webpack.BannerPlugin({
